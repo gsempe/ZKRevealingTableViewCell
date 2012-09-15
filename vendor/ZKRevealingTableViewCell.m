@@ -404,9 +404,30 @@ static char BOOLRevealing;
 	if (gestureRecognizer == self._panGesture) {
 		UIScrollView *superview = (UIScrollView *)self.superview;
 		CGPoint translation = [(UIPanGestureRecognizer *)gestureRecognizer translationInView:superview];
+        
+        BOOL isThatPanGestureShouldStart = NO;
 		
 		// Make sure it is scrolling horizontally
-		return ((fabs(translation.x) / fabs(translation.y) > 1) ? YES : NO && (superview.contentOffset.y == 0.0 && superview.contentOffset.x == 0.0));
+		isThatPanGestureShouldStart = ((fabs(translation.x) / fabs(translation.y) > 1) ? YES : NO && (superview.contentOffset.y == 0.0 && superview.contentOffset.x == 0.0));
+        // Make sure this direction is ok
+        switch (self.direction) {
+            case ZKRevealingTableViewCellDirectionRight:
+                isThatPanGestureShouldStart = isThatPanGestureShouldStart & (translation.x > 0);
+                break;
+            case ZKRevealingTableViewCellDirectionLeft:
+                isThatPanGestureShouldStart = isThatPanGestureShouldStart & (translation.x < 0);
+                break;
+            case ZKRevealingTableViewCellDirectionBoth:
+                // No direction constraint 
+                break;
+            case ZKRevealingTableViewCellDirectionNone:
+                isThatPanGestureShouldStart = NO;
+                break;
+            default:
+                isThatPanGestureShouldStart = NO;
+                break;
+        }
+        return isThatPanGestureShouldStart;
 	}
 	return NO;
 }
